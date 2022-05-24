@@ -1,6 +1,5 @@
 # PyQtFileDialog.py
 import sys
-
 import pandas
 import re
 import numpy as np
@@ -8,6 +7,7 @@ from PyQt5.QtWidgets import *
 import pandas as pd
 from PyQt5.QtCore import *
 import _ParsingPattern_ as Par
+from _ReadDataFile_ import *
 
 class CFileDialogWindow(QWidget) :
     def __init__(self) :
@@ -40,25 +40,26 @@ class CFileDialogWindow(QWidget) :
                                             'Inforfile(*.txt)')
         rawData = pd.read_csv(fname[0], engine='c', encoding='cp1252', on_bad_lines='skip', header=None,
                         skip_blank_lines=True, keep_default_na=False)
-        [tmpData.append(rawData.loc[i].str.split()) for i in range(len(rawData))]
+        # [tmpData.append(rawData.loc[i].str.split()) for i in range(len(rawData))]
 
         for name, pattern in Par.InformationTest().__dict__.items() :
             columList.append([name, np.where(rawData[0].str.contains(pattern, flags=re.I))[0]])
         print(columList)
-
-
 
         self.label.setText(fname[0])
 
     def BTData_clicked(self):
         tmpData = []
         fname = QFileDialog.getOpenFileName(self, 'Select File', 'D:\\uno\\2021\\핸들링편차파일\\',
-                                            'Inforfile(*.txt)')
+                                            'Datafile(*.txt);;Datafile(*.vbo)')
         rawData = pd.read_csv(fname[0], engine='c', encoding='cp1252', on_bad_lines='skip', header=None,
                         skip_blank_lines=True, keep_default_na=False)
-        [tmpData.append(rawData.loc[i].str.split()) for i in range(len(rawData))]
-
+        # [tmpData.append(rawData.loc[i].str.split()) for i in range(len(rawData))]
+        lineNumColumns, lineNumData = funcFindHeader(rawData)
+        dataName = funcMakeDataFrame(rawData, lineNumColumns)
+        tmpData = funcMakeDataFrame(rawData, lineNumData, -1)
         self.label.setText(fname[0])
+        # pdST.to_csv("D:\\workroom\\p_workroom\\_DATA_Traing\\FSData.csv", mode='w')
 
 if __name__ == "__main__" :
     app = QApplication(sys.argv)
